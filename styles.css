@@ -76,29 +76,24 @@ body {
 .hero h1 { margin: 0 0 4px; font-size: 28px; letter-spacing: -0.02em; }
 .subtitle { margin: 0; color: var(--text-dim); }
 
-.menu { display: grid; gap: 12px; margin-top: 16px; }
-
 .card {
-  appearance: none;
-  -webkit-appearance: none;
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px 18px;
   text-align: left;
-  display: grid;
-  gap: 4px;
-  cursor: pointer;
   font: inherit;
   box-shadow: var(--shadow);
-  transition: transform .08s ease, background-color .15s ease;
+  margin-top: 12px;
 }
-.card:active { transform: scale(0.985); background: var(--surface-2); }
-.card.disabled { opacity: 0.5; cursor: default; }
+.card.disabled { opacity: 0.5; }
+.card-head { display: grid; gap: 4px; }
 .card-title { font-size: 18px; font-weight: 600; }
 .card-desc { color: var(--text-dim); font-size: 14px; }
 .card-stats { color: var(--text-dim); font-size: 13px; margin-top: 6px; }
+.mode-card .length-h { margin: 18px 0 10px; }
+.mode-card .custom { margin-top: 12px; }
 
 .foot { text-align: center; margin-top: 24px; }
 .link {
@@ -261,14 +256,13 @@ body {
 }
 .chip {
   appearance: none; -webkit-appearance: none;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
   color: var(--text);
-  font: 600 28px/1 inherit;
-  height: 88px;
+  font: 600 24px/1 inherit;
+  height: 64px;
   cursor: pointer;
-  box-shadow: var(--shadow);
   transition: transform .08s ease, background-color .15s ease, border-color .15s ease;
   font-variant-numeric: tabular-nums;
 }

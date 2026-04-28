@@ -120,13 +120,12 @@ function nextQuestion() {
 
 /* ---------- Routing ---------- */
 
-const screens = ["home", "length", "trainer", "settings", "summary"];
+const screens = ["home", "trainer", "settings", "summary"];
 function go(name) {
   for (const s of screens) {
     document.getElementById(`screen-${s}`).classList.toggle("active", s === name);
   }
   if (name === "home") refreshHome();
-  if (name === "length") renderLength();
   if (name === "settings") renderSettings();
   window.scrollTo(0, 0);
 }
@@ -136,14 +135,13 @@ document.addEventListener("click", (e) => {
   if (t) { e.preventDefault(); go(t.dataset.go); }
 });
 
-/* ---------- Length picker ---------- */
+/* ---------- Length picker (lives inside the home screen) ---------- */
 
-function renderLength() {
+function renderLengthPicker() {
   const last = settings.lastLength;
   for (const chip of document.querySelectorAll("#l-chips .chip")) {
     chip.classList.toggle("last", parseInt(chip.dataset.len, 10) === last);
   }
-  // Pre-fill custom input only if last choice is non-standard
   const standard = new Set([10, 20, 50, 0]);
   const customEl = document.getElementById("l-custom");
   customEl.value = standard.has(last) ? "" : String(last);
@@ -351,9 +349,6 @@ function finishSession() {
 document.getElementById("su-again").addEventListener("click", () => {
   startSession(T.target);
 });
-document.getElementById("su-change").addEventListener("click", () => {
-  go("length");
-});
 
 /* ---------- Home ---------- */
 
@@ -362,6 +357,7 @@ function refreshHome() {
   const acc = s.total ? Math.round((s.correct / s.total) * 100) : 0;
   document.getElementById("home-stats-commashift").textContent =
     s.total ? `${s.correct}/${s.total} richtig (${acc}%) · Beste Serie ${s.bestStreak}` : "Noch nicht trainiert";
+  renderLengthPicker();
 }
 
 /* ---------- Settings ---------- */

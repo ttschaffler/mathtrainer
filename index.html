@@ -26,32 +26,13 @@
         <p class="subtitle">Trainiere dein Kopfrechnen.</p>
       </header>
 
-      <nav class="menu">
-        <button class="card" data-go="length" data-mode="commashift">
+      <div class="card mode-card" data-mode="commashift">
+        <div class="card-head">
           <span class="card-title">Komma verschieben</span>
           <span class="card-desc">×10, ×100, ×1000 und ÷10, ÷100, ÷1000</span>
           <span class="card-stats" id="home-stats-commashift"></span>
-        </button>
-        <button class="card disabled" disabled>
-          <span class="card-title">Bald verfügbar</span>
-          <span class="card-desc">Weitere Trainings folgen</span>
-        </button>
-      </nav>
+        </div>
 
-      <footer class="foot">
-        <button class="link" data-go="settings">Einstellungen</button>
-      </footer>
-    </section>
-
-    <!-- LENGTH PICKER -->
-    <section id="screen-length" class="screen">
-      <header class="bar">
-        <button class="bar-btn" data-go="home" aria-label="Zurück">‹</button>
-        <h2 class="bar-title">Komma verschieben</h2>
-        <button class="bar-btn" data-go="settings" aria-label="Einstellungen">⚙︎</button>
-      </header>
-
-      <div class="length">
         <h3 class="length-h">Wie viele Aufgaben?</h3>
         <div class="chips" id="l-chips">
           <button class="chip" data-len="10">10</button>
@@ -60,24 +41,34 @@
           <button class="chip" data-len="0">∞</button>
         </div>
 
-        <h3 class="length-h">Eigene Anzahl</h3>
         <form class="custom" id="l-custom-form" autocomplete="off" novalidate>
           <input
             id="l-custom"
             type="number"
             inputmode="numeric"
             min="1" max="999"
-            placeholder="z. B. 30"
+            placeholder="Eigene Anzahl"
           />
           <button class="btn primary" type="submit">Starten</button>
         </form>
       </div>
+
+      <div class="card disabled mode-card">
+        <div class="card-head">
+          <span class="card-title">Bald verfügbar</span>
+          <span class="card-desc">Weitere Trainings folgen</span>
+        </div>
+      </div>
+
+      <footer class="foot">
+        <button class="link" data-go="settings">Einstellungen</button>
+      </footer>
     </section>
 
     <!-- TRAINER -->
     <section id="screen-trainer" class="screen">
       <header class="bar">
-        <button class="bar-btn" data-go="length" aria-label="Zurück">‹</button>
+        <button class="bar-btn" data-go="home" aria-label="Zurück">‹</button>
         <div class="bar-stats">
           <span class="stat"><span id="t-correct">0</span>/<span id="t-total">0</span><span id="t-target"></span></span>
           <span class="stat streak"><span id="t-streak">0</span>🔥</span>
@@ -152,9 +143,8 @@
 
         <div class="summary-actions">
           <button class="btn primary" id="su-again">Nochmal</button>
-          <button class="btn ghost" id="su-change">Andere Länge</button>
+          <button class="btn ghost" data-go="home">Zur Startseite</button>
         </div>
-        <button class="link" data-go="home" style="margin-top:8px;">Zur Startseite</button>
       </div>
     </section>
 
