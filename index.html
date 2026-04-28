@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#0a84ff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0a84ff" media="(prefers-color-scheme: dark)" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MathTrainer" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>MathTrainer</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon-180.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="app">
+    <!-- HOME -->
+    <section id="screen-home" class="screen active">
+      <header class="hero">
+        <div class="logo" aria-hidden="true">M</div>
+        <h1>MathTrainer</h1>
+        <p class="subtitle">Trainiere dein Kopfrechnen.</p>
+      </header>
+
+      <nav class="menu">
+        <button class="card" data-go="trainer" data-mode="commashift">
+          <span class="card-title">Komma verschieben</span>
+          <span class="card-desc">×10, ×100, ×1000 und ÷10, ÷100, ÷1000</span>
+          <span class="card-stats" id="home-stats-commashift"></span>
+        </button>
+        <button class="card disabled" disabled>
+          <span class="card-title">Bald verfügbar</span>
+          <span class="card-desc">Weitere Trainings folgen</span>
+        </button>
+      </nav>
+
+      <footer class="foot">
+        <button class="link" data-go="settings">Einstellungen</button>
+      </footer>
+    </section>
+
+    <!-- TRAINER -->
+    <section id="screen-trainer" class="screen">
+      <header class="bar">
+        <button class="bar-btn" data-go="home" aria-label="Zurück">‹</button>
+        <div class="bar-stats">
+          <span class="stat"><span id="t-correct">0</span>/<span id="t-total">0</span></span>
+          <span class="stat streak"><span id="t-streak">0</span>🔥</span>
+        </div>
+        <button class="bar-btn" data-go="settings" aria-label="Einstellungen">⚙︎</button>
+      </header>
+
+      <div class="trainer">
+        <div class="question" id="t-question" aria-live="polite">—</div>
+
+        <form id="t-form" autocomplete="off" novalidate>
+          <input
+            id="t-answer"
+            type="text"
+            inputmode="decimal"
+            enterkeyhint="go"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="?"
+          />
+          <div id="t-feedback" class="feedback"></div>
+          <div class="actions">
+            <button type="button" class="btn ghost" id="t-skip">Überspringen</button>
+            <button type="submit" class="btn primary" id="t-submit">Prüfen</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="screen-settings" class="screen">
+      <header class="bar">
+        <button class="bar-btn" data-go="home" aria-label="Zurück">‹</button>
+        <h2 class="bar-title">Einstellungen</h2>
+        <span class="bar-btn placeholder"></span>
+      </header>
+
+      <div class="settings">
+        <h3>Komma verschieben</h3>
+
+        <label class="row">
+          <span>Maximale Vorkommastellen</span>
+          <select id="s-intDigits">
+            <option value="1">1 (z. B. 7)</option>
+            <option value="2">2 (z. B. 73)</option>
+            <option value="3" selected>3 (z. B. 425)</option>
+            <option value="4">4 (z. B. 9148)</option>
+          </select>
+        </label>
+
+        <label class="row">
+          <span>Maximale Nachkommastellen</span>
+          <select id="s-decDigits">
+            <option value="1">1 (z. B. 0,4)</option>
+            <option value="2">2 (z. B. 0,17)</option>
+            <option value="3" selected>3 (z. B. 0,389)</option>
+            <option value="4">4 (z. B. 0,2351)</option>
+          </select>
+        </label>
+
+        <fieldset class="ops">
+          <legend>Operationen</legend>
+          <label><input type="checkbox" data-op="*10"     checked> ×10</label>
+          <label><input type="checkbox" data-op="*100"    checked> ×100</label>
+          <label><input type="checkbox" data-op="*1000"   checked> ×1000</label>
+          <label><input type="checkbox" data-op="*10000"> ×10000</label>
+          <label><input type="checkbox" data-op="/10"     checked> ÷10</label>
+          <label><input type="checkbox" data-op="/100"    checked> ÷100</label>
+          <label><input type="checkbox" data-op="/1000"   checked> ÷1000</label>
+          <label><input type="checkbox" data-op="/10000"> ÷10000</label>
+        </fieldset>
+
+        <button class="btn danger" id="s-reset">Statistik zurücksetzen</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
