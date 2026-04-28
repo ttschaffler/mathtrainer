@@ -27,7 +27,7 @@
       </header>
 
       <nav class="menu">
-        <button class="card" data-go="trainer" data-mode="commashift">
+        <button class="card" data-go="length" data-mode="commashift">
           <span class="card-title">Komma verschieben</span>
           <span class="card-desc">×10, ×100, ×1000 und ÷10, ÷100, ÷1000</span>
           <span class="card-stats" id="home-stats-commashift"></span>
@@ -43,12 +43,43 @@
       </footer>
     </section>
 
+    <!-- LENGTH PICKER -->
+    <section id="screen-length" class="screen">
+      <header class="bar">
+        <button class="bar-btn" data-go="home" aria-label="Zurück">‹</button>
+        <h2 class="bar-title">Komma verschieben</h2>
+        <button class="bar-btn" data-go="settings" aria-label="Einstellungen">⚙︎</button>
+      </header>
+
+      <div class="length">
+        <h3 class="length-h">Wie viele Aufgaben?</h3>
+        <div class="chips" id="l-chips">
+          <button class="chip" data-len="10">10</button>
+          <button class="chip" data-len="20">20</button>
+          <button class="chip" data-len="50">50</button>
+          <button class="chip" data-len="0">∞</button>
+        </div>
+
+        <h3 class="length-h">Eigene Anzahl</h3>
+        <form class="custom" id="l-custom-form" autocomplete="off" novalidate>
+          <input
+            id="l-custom"
+            type="number"
+            inputmode="numeric"
+            min="1" max="999"
+            placeholder="z. B. 30"
+          />
+          <button class="btn primary" type="submit">Starten</button>
+        </form>
+      </div>
+    </section>
+
     <!-- TRAINER -->
     <section id="screen-trainer" class="screen">
       <header class="bar">
-        <button class="bar-btn" data-go="home" aria-label="Zurück">‹</button>
+        <button class="bar-btn" data-go="length" aria-label="Zurück">‹</button>
         <div class="bar-stats">
-          <span class="stat"><span id="t-correct">0</span>/<span id="t-total">0</span></span>
+          <span class="stat"><span id="t-correct">0</span>/<span id="t-total">0</span><span id="t-target"></span></span>
           <span class="stat streak"><span id="t-streak">0</span>🔥</span>
         </div>
         <button class="bar-btn" data-go="settings" aria-label="Einstellungen">⚙︎</button>
@@ -75,6 +106,55 @@
             <button type="submit" class="btn primary" id="t-submit">Prüfen</button>
           </div>
         </form>
+
+        <div class="end-row">
+          <button type="button" class="link" id="t-end" hidden>Sitzung beenden</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUMMARY -->
+    <section id="screen-summary" class="screen">
+      <header class="bar">
+        <span class="bar-btn placeholder"></span>
+        <h2 class="bar-title">Zusammenfassung</h2>
+        <span class="bar-btn placeholder"></span>
+      </header>
+
+      <div class="summary">
+        <div class="rating" id="su-rating">
+          <div class="rating-emoji" id="su-emoji">🥇</div>
+          <div class="rating-label" id="su-label">Hervorragend</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-label">Genauigkeit</div>
+          <div class="stat-card-value">
+            <span id="su-correct">0</span>/<span id="su-total">0</span>
+            <span class="stat-card-sub" id="su-acc">0%</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-label">Längste Serie</div>
+          <div class="stat-card-value"><span id="su-streak">0</span> 🔥</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-label">Ø Zeit pro Aufgabe</div>
+          <div class="stat-card-value"><span id="su-avgtime">–</span></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-label">Gesamtdauer</div>
+          <div class="stat-card-value"><span id="su-duration">–</span></div>
+        </div>
+
+        <div class="summary-actions">
+          <button class="btn primary" id="su-again">Nochmal</button>
+          <button class="btn ghost" id="su-change">Andere Länge</button>
+        </div>
+        <button class="link" data-go="home" style="margin-top:8px;">Zur Startseite</button>
       </div>
     </section>
 

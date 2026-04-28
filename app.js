@@ -17,6 +17,7 @@ const DEFAULT_SETTINGS = {
     "*10": true,  "*100": true,  "*1000": true,  "*10000": false,
     "/10": true,  "/100": true,  "/1000": true,  "/10000": false,
   },
+  lastLength: 20, // 0 = endless
 };
 
 const DEFAULT_STATS = {
@@ -119,13 +120,13 @@ function nextQuestion() {
 
 /* ---------- Routing ---------- */
 
-const screens = ["home", "trainer", "settings"];
+const screens = ["home", "length", "trainer", "settings", "summary"];
 function go(name) {
   for (const s of screens) {
     document.getElementById(`screen-${s}`).classList.toggle("active", s === name);
   }
-  if (name === "trainer") startSession();
   if (name === "home") refreshHome();
+  if (name === "length") renderLength();
   if (name === "settings") renderSettings();
   window.scrollTo(0, 0);
 }
@@ -135,13 +136,48 @@ document.addEventListener("click", (e) => {
   if (t) { e.preventDefault(); go(t.dataset.go); }
 });
 
+/* ---------- Length picker ---------- */
+
+function renderLength() {
+  const last = settings.lastLength;
+  for (const chip of document.querySelectorAll("#l-chips .chip")) {
+    chip.classList.toggle("last", parseInt(chip.dataset.len, 10) === last);
+  }
+  // Pre-fill custom input only if last choice is non-standard
+  const standard = new Set([10, 20, 50, 0]);
+  const customEl = document.getElementById("l-custom");
+  customEl.value = standard.has(last) ? "" : String(last);
+}
+
+document.getElementById("l-chips").addEventListener("click", (e) => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  const len = parseInt(chip.dataset.len, 10);
+  startSession(len);
+});
+
+document.getElementById("l-custom-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const v = parseInt(document.getElementById("l-custom").value, 10);
+  if (!Number.isFinite(v) || v < 1 || v > 999) {
+    document.getElementById("l-custom").focus();
+    return;
+  }
+  startSession(v);
+});
+
 /* ---------- Trainer ---------- */
 
 const T = {
   current: null,
+  target: 0,         // 0 = endless
   correct: 0,
   total: 0,
   streak: 0,
+  bestStreak: 0,     // longest streak this session
+  totalTimeMs: 0,    // sum of response times
+  questionStart: 0,  // performance.now() of current question
+  sessionStart: 0,
   locked: false,
 };
 
@@ -150,10 +186,20 @@ const elAnswer   = () => document.getElementById("t-answer");
 const elFeedback = () => document.getElementById("t-feedback");
 const elCorrect  = () => document.getElementById("t-correct");
 const elTotal    = () => document.getElementById("t-total");
+const elTarget   = () => document.getElementById("t-target");
 const elStreak   = () => document.getElementById("t-streak");
+const elEnd      = () => document.getElementById("t-end");
 
-function startSession() {
-  T.correct = 0; T.total = 0; T.streak = 0; T.locked = false;
+function startSession(target) {
+  T.target = Number.isFinite(target) && target > 0 ? target : 0;
+  T.correct = 0; T.total = 0; T.streak = 0; T.bestStreak = 0;
+  T.totalTimeMs = 0; T.sessionStart = performance.now();
+  T.locked = false;
+
+  settings.lastLength = T.target;
+  saveSettings();
+
+  go("trainer");
   updateBar();
   showQuestion();
 }
@@ -161,22 +207,35 @@ function startSession() {
 function updateBar() {
   elCorrect().textContent = T.correct;
   elTotal().textContent = T.total;
+  elTarget().textContent = T.target ? `/${T.target}` : "";
   elStreak().textContent = T.streak;
+  // End-session link visible only after first answer (and only really useful in endless mode,
+  // but allowed everywhere so users can quit early if they want)
+  elEnd().hidden = T.total === 0;
 }
 
 function showQuestion() {
   T.current = nextQuestion();
   T.locked = false;
+  T.questionStart = performance.now();
   const a = elAnswer();
   a.value = "";
   a.classList.remove("good", "bad", "shake");
   elFeedback().textContent = "";
   elFeedback().className = "feedback";
   elQuestion().textContent = `${T.current.operandText} ${T.current.opSymbol} ${T.current.factor}`;
-  // Focus only if user is interacting (avoid keyboard popping unexpectedly on first load)
   if (document.getElementById("screen-trainer").classList.contains("active")) {
     setTimeout(() => a.focus({ preventScroll: true }), 30);
   }
+}
+
+function recordTime() {
+  T.totalTimeMs += performance.now() - T.questionStart;
+}
+
+function advanceOrFinish() {
+  if (T.target && T.total >= T.target) finishSession();
+  else showQuestion();
 }
 
 function submitAnswer() {
@@ -191,15 +250,17 @@ function submitAnswer() {
     return;
   }
   T.locked = true;
+  recordTime();
   T.total++;
   if (eq(parsed, T.current.answer)) {
     T.correct++; T.streak++;
+    if (T.streak > T.bestStreak) T.bestStreak = T.streak;
     elAnswer().classList.add("good");
     elFeedback().textContent = "Richtig!";
     elFeedback().className = "feedback good";
     bumpStats(true);
     updateBar();
-    setTimeout(showQuestion, 550);
+    setTimeout(advanceOrFinish, 550);
   } else {
     T.streak = 0;
     elAnswer().classList.add("bad", "shake");
@@ -207,20 +268,21 @@ function submitAnswer() {
     elFeedback().className = "feedback bad";
     bumpStats(false);
     updateBar();
-    setTimeout(showQuestion, 1700);
+    setTimeout(advanceOrFinish, 1700);
   }
 }
 
 function skipQuestion() {
   if (T.locked) return;
   T.locked = true;
+  recordTime();
   T.total++;
   T.streak = 0;
   elFeedback().textContent = `Antwort: ${T.current.answerText}`;
   elFeedback().className = "feedback";
   bumpStats(false);
   updateBar();
-  setTimeout(showQuestion, 1100);
+  setTimeout(advanceOrFinish, 1100);
 }
 
 function bumpStats(correct) {
@@ -236,6 +298,62 @@ document.getElementById("t-form").addEventListener("submit", (e) => {
   submitAnswer();
 });
 document.getElementById("t-skip").addEventListener("click", skipQuestion);
+document.getElementById("t-end").addEventListener("click", () => {
+  if (T.total > 0) finishSession();
+});
+
+/* ---------- Summary ---------- */
+
+function rate(acc, total) {
+  if (total === 0)      return { emoji: "🤔", label: "Keine Antworten", tone: "weak" };
+  if (acc === 1)        return { emoji: "🏆", label: "Perfekt!",        tone: "great" };
+  if (acc >= 0.9)       return { emoji: "🥇", label: "Hervorragend",   tone: "great" };
+  if (acc >= 0.75)      return { emoji: "🥈", label: "Sehr gut",       tone: "good" };
+  if (acc >= 0.5)       return { emoji: "🥉", label: "Solide",         tone: "ok" };
+  return                       { emoji: "💪", label: "Weiter üben",    tone: "weak" };
+}
+
+function fmtSeconds(ms) {
+  const s = ms / 1000;
+  return s.toFixed(1).replace(".", ",") + " s";
+}
+
+function fmtDuration(ms) {
+  const totalSec = Math.round(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return m > 0 ? `${m} min ${s} s` : `${s} s`;
+}
+
+function finishSession() {
+  const total = T.total;
+  const acc = total > 0 ? T.correct / total : 0;
+  const r = rate(acc, total);
+
+  const ratingEl = document.getElementById("su-rating");
+  ratingEl.classList.remove("great", "good", "ok", "weak");
+  ratingEl.classList.add(r.tone);
+  document.getElementById("su-emoji").textContent = r.emoji;
+  document.getElementById("su-label").textContent = r.label;
+
+  document.getElementById("su-correct").textContent = T.correct;
+  document.getElementById("su-total").textContent = total;
+  document.getElementById("su-acc").textContent = total ? `${Math.round(acc * 100)}%` : "—";
+  document.getElementById("su-streak").textContent = T.bestStreak;
+  document.getElementById("su-avgtime").textContent =
+    total ? fmtSeconds(T.totalTimeMs / total) : "—";
+  document.getElementById("su-duration").textContent =
+    fmtDuration(performance.now() - T.sessionStart);
+
+  go("summary");
+}
+
+document.getElementById("su-again").addEventListener("click", () => {
+  startSession(T.target);
+});
+document.getElementById("su-change").addEventListener("click", () => {
+  go("length");
+});
 
 /* ---------- Home ---------- */
 
