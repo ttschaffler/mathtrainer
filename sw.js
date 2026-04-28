@@ -1,5 +1,6 @@
-/* Simple offline cache for the app shell. */
-const CACHE = "mathtrainer-v1";
+/* App-shell cache. Strategy: network-first so code updates land immediately
+   when the user is online; cache is only used as an offline fallback. */
+const CACHE = "mathtrainer-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -16,23 +17,22 @@ self.addEventListener("install", (e) => {
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-    )
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
   e.respondWith(
-    caches.match(req).then((hit) =>
-      hit || fetch(req).then((res) => {
+    fetch(req)
+      .then((res) => {
         const copy = res.clone();
         caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
         return res;
-      }).catch(() => caches.match("./index.html"))
-    )
+      })
+      .catch(() => caches.match(req).then((hit) => hit || caches.match("./index.html")))
   );
 });
